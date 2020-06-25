@@ -15,12 +15,12 @@ const PostSchema = new Schema(
   }
 );
 
-userSchema.virtual('likes', {
+PostSchema.virtual('likes', {
   ref: 'likes',
   localField: '_id',
   foreignField: 'postId',
 });
-userSchema.virtual('comments', {
+PostSchema.virtual('comments', {
   ref: 'comments',
   localField: '_id',
   foreignField: 'postId',

@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRouter = require('./routes/auth.route');
+const postRouter = require('./routes/post.route');
+const { ensureAuthMiddleware } = require('./middlewares/auth.middleware');
 const app = express();
 
 app.use(cors());
@@ -20,7 +22,7 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
 app.use('/api/auth', authRouter);
-
+app.use('/api/posts', ensureAuthMiddleware, postRouter);
 app.use((err, req, res, next) => {
   res.status(400).json(err);
 });

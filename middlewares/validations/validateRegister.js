@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
       errors.email = 'Email này đã được sử dụng';
     }
     if (checkUsername.length) {
-      errors.isExistsUsername = 'Username này đã được sử dụng';
+      errors.username = 'Username này đã được sử dụng';
     }
     if (Object.keys(errors).length !== 0) {
       return res.status(400).json({ ...errors });
