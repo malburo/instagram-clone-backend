@@ -2,11 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
+const authRouter = require('./routes/auth.route');
 const app = express();
 
 app.use(cors());
-app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI, {
@@ -19,6 +18,8 @@ mongoose.connection.on('connected', () => {
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
+
+app.use('/api/auth', authRouter);
 
 app.use((err, req, res, next) => {
   res.status(400).json(err);
