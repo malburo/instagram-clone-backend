@@ -28,6 +28,6 @@ userSchema.virtual('posts', {
   localField: '_id',
   foreignField: 'userId',
 });
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('users', userSchema);
 
 module.exports = User;

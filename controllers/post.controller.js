@@ -10,9 +10,13 @@ cloudinary.config({
 
 exports.get = async (req, res, next) => {
   try {
-    const posts = await Post.find().populate('users');
+    const posts = await Post.find()
+      .populate({ path: 'likes' })
+      .populate('comments');
     return res.status(201).json({
       posts: posts,
+      likes: posts.likes,
+      comments: posts.comments,
     });
   } catch (err) {
     return next({ status: 400, message: err.message });

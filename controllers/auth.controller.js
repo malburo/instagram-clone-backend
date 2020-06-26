@@ -29,7 +29,6 @@ exports.login = async (req, res, next) => {
 
 exports.register = async (req, res, next) => {
   try {
-    console.log(req.body);
     const saltRounds = 10;
     const { fullname, username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, saltRounds);

@@ -5,12 +5,12 @@ const CommentSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'users',
     },
     postId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'Post',
+      ref: 'posts',
     },
     content: String,
   },
@@ -19,6 +19,6 @@ const CommentSchema = new Schema(
   }
 );
 
-const Comment = model('Comment', CommentSchema);
+const Comment = model('comments', CommentSchema);
 
 module.exports = Comment;

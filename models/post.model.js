@@ -5,7 +5,7 @@ const PostSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'users',
     },
     caption: { type: String },
     postPictureUrl: { type: String },
@@ -25,7 +25,8 @@ PostSchema.virtual('comments', {
   localField: '_id',
   foreignField: 'postId',
 });
-
-const Post = model('Post', PostSchema);
+PostSchema.set('toObject', { virtuals: true });
+PostSchema.set('toJSON', { virtuals: true });
+const Post = model('posts', PostSchema);
 
 module.exports = Post;
