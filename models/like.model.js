@@ -4,6 +4,7 @@ const LikeSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
+      ref: 'users',
       required: true,
     },
     postId: {
@@ -11,7 +12,7 @@ const LikeSchema = new Schema(
       required: true,
       ref: 'posts',
     },
-    type: String,
+    isLiked: { type: Boolean, default: false },
   },
   {
     timestamps: true,

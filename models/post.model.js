@@ -25,6 +25,7 @@ PostSchema.virtual('comments', {
   localField: '_id',
   foreignField: 'postId',
 });
+
 PostSchema.set('toObject', { virtuals: true });
 PostSchema.set('toJSON', { virtuals: true });
 const Post = model('posts', PostSchema);
