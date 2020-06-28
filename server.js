@@ -9,6 +9,8 @@ require('./models/comment.model');
 const cors = require('cors');
 const authRouter = require('./routes/auth.route');
 const postRouter = require('./routes/post.route');
+const likeRouter = require('./routes/like.route');
+const commentRouter = require('./routes/comment.route');
 const profileRouter = require('./routes/profile.route');
 const { ensureAuthMiddleware } = require('./middlewares/auth.middleware');
 const app = express();
@@ -29,6 +31,8 @@ mongoose.set('useCreateIndex', true);
 
 app.use('/api/auth', authRouter);
 app.use('/api/posts', ensureAuthMiddleware, postRouter);
+app.use('/api/likes', ensureAuthMiddleware, likeRouter);
+app.use('/api/comments', ensureAuthMiddleware, commentRouter);
 app.use('/api/profile', profileRouter);
 app.use((err, req, res, next) => {
   res.status(400).json(err);

@@ -7,6 +7,7 @@ const CommentSchema = new Schema(
       required: true,
       ref: 'users',
     },
+
     postId: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -18,7 +19,6 @@ const CommentSchema = new Schema(
     timestamps: true,
   }
 );
-
 const Comment = model('comments', CommentSchema);
 
 module.exports = Comment;

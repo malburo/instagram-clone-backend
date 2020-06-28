@@ -12,11 +12,14 @@ exports.get = async (req, res, next) => {
   try {
     const posts = await Post.find()
       .populate({ path: 'likes' })
-      .populate('comments');
+      .populate({
+        path: 'comments',
+        populate: { path: 'userId' },
+      })
+      .populate({ path: 'userId', select: 'profilePictureUrl username' })
+      .sort({ _id: -1 });
     return res.status(201).json({
       posts: posts,
-      likes: posts.likes,
-      comments: posts.comments,
     });
   } catch (err) {
     return next({ status: 400, message: err.message });
@@ -30,14 +33,18 @@ exports.create = async (req, res, next) => {
       await cloudinary.uploader.upload(req.file.path, async (error, result) => {
         postPictureUrl = result.url;
       });
+      fs.unlinkSync(req.file.path);
       const newPost = await Post.create({
         userId: req.user._id,
         caption: req.body.caption,
         postPictureUrl,
       });
-      fs.unlinkSync(req.file.path);
+      const post = await Post.findById(newPost._id)
+        .populate({ path: 'likes' })
+        .populate('comments')
+        .populate({ path: 'userId', select: 'profilePictureUrl username' });
       return res.status(201).json({
-        newPost: newPost,
+        newPost: post,
       });
     } else {
       next({ status: 400, message: 'upload ko thanh cong' });

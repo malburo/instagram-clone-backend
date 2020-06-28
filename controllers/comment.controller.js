@@ -1,26 +1,16 @@
-const User = require('../models/user.model');
-exports.get = async (req, res, next) => {
-  try {
-    const user = await User.findOne().populate('posts');
-    console.log(user);
-    return res.status(201).json({
-      user: user.posts,
-    });
-  } catch (err) {
-    return next({ status: 400, message: err.message });
-  }
-};
+const Comment = require('../models/comment.model');
 
 exports.create = async (req, res, next) => {
   try {
-    const { content, postId } = req.body;
-    let newComment = await User.create({
+    const { comment, postId } = req.body;
+    let newComment = await Comment.create({
       userId: req.user._id,
       postId,
-      content,
+      content: comment,
     });
+    newComment._doc.userId = req.user;
     return res.status(201).json({
-      newComment: newComment,
+      data: newComment,
     });
   } catch (err) {
     return next({ status: 400, message: err.message });

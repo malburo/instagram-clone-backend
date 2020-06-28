@@ -16,7 +16,7 @@ const userSchema = new Schema(
     profilePictureUrl: {
       type: String,
       default:
-        'https://res.cloudinary.com/malburo/image/upload/v1593095165/default-avatar/default-avatar_oicvgv.jpg',
+        'https://res.cloudinary.com/malburo/image/upload/v1593193329/default-avatar/631929649c_tbfndr.svg',
     },
   },
   {
@@ -28,6 +28,7 @@ userSchema.virtual('posts', {
   localField: '_id',
   foreignField: 'userId',
 });
+
 const User = mongoose.model('users', userSchema);
 
 module.exports = User;
