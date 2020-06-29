@@ -33,7 +33,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/posts', ensureAuthMiddleware, postRouter);
 app.use('/api/likes', ensureAuthMiddleware, likeRouter);
 app.use('/api/comments', ensureAuthMiddleware, commentRouter);
-app.use('/api/profile', profileRouter);
+app.use('/api/profile', ensureAuthMiddleware, profileRouter);
 app.use((err, req, res, next) => {
   res.status(400).json(err);
 });
