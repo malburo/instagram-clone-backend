@@ -2,6 +2,22 @@ const User = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+exports.checkToken = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    delete user._doc.password;
+    res.status(201).json({
+      user,
+      isValid: true,
+    });
+  } catch (err) {
+    return next({
+      status: 400,
+      message: err.message,
+    });
+  }
+};
+
 exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ username: req.body.username });

@@ -9,6 +9,11 @@ exports.getPosts = async (req, res, next) => {
       path: 'posts',
       options: { sort: { _id: -1 } },
     });
+    if (profile === null) {
+      return res.status(201).json({
+        checkParams: false,
+      });
+    }
     if (Object.keys(profile).length === 0 && profile.constructor === Object) {
       return res.status(404).json({
         message: 'get failed',
@@ -20,6 +25,7 @@ exports.getPosts = async (req, res, next) => {
     }
     return res.status(201).json({
       profile,
+      checkParams: true,
       isCurrentUser,
     });
   } catch (err) {

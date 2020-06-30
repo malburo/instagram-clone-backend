@@ -1,7 +1,6 @@
 const User = require('../models/user.model');
 const Like = require('../models/like.model');
 
-
 exports.like = async (req, res, next) => {
   try {
     const { postId } = req.body;
