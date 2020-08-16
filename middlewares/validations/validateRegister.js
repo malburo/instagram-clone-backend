@@ -23,10 +23,13 @@ module.exports = async (req, res, next) => {
       errors.username = 'Username này đã được sử dụng';
     }
     if (Object.keys(errors).length !== 0) {
-      return res.status(400).json({ ...errors });
+      return next({
+        status: 422,
+        errors: { ...errors },
+      });
     }
     next();
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
