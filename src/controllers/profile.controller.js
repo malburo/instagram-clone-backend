@@ -1,4 +1,4 @@
-const User = require('../../models/user.model');
+const User = require('../models/user.model');
 var fs = require('fs');
 let cloudinary = require('cloudinary').v2;
 

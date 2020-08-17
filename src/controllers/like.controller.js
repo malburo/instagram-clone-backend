@@ -1,5 +1,4 @@
-const User = require('../src/models/user.model');
-const Like = require('../src/models/like.model');
+const Like = require('../models/like.model');
 
 exports.like = async (req, res, next) => {
   try {

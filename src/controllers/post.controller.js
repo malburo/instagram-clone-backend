@@ -1,4 +1,4 @@
-const Post = require('../src/models/post.model');
+const Post = require('../models/post.model');
 var fs = require('fs');
 let cloudinary = require('cloudinary').v2;
 
