@@ -5,6 +5,10 @@ var router = express.Router();
 
 const postController = require('../../controllers/post.controller');
 
-router.get('/', postController.get);
 router.post('/create', upload.single('postImage'), postController.create);
+router.post('/:postId/like', postController.like);
+router.post('/:postId/unlike', postController.unlike);
+router.post('/:postId/comment', postController.comment);
+router.get('/', postController.get);
+
 module.exports = router;

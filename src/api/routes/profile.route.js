@@ -5,6 +5,11 @@ var upload = multer({ dest: 'uploads/' });
 
 const profileController = require('../../controllers/profile.controller');
 
-router.get('/:username/posts', profileController.getPosts);
-router.post('/avatar', upload.single('avatar'), profileController.changeAvatar);
+router.get('/:username', profileController.getPosts);
+router.post(
+  '/:username/change-avatar',
+  upload.single('avatar'),
+  profileController.changeAvatar
+);
+
 module.exports = router;
