@@ -2,34 +2,26 @@ const User = require('../models/user.model');
 var fs = require('fs');
 let cloudinary = require('cloudinary').v2;
 
-exports.getPosts = async (req, res, next) => {
+exports.getProfile = async (req, res, next) => {
   try {
     const { username } = req.params;
-    const profile = await User.findOne({ username }).populate({
-      path: 'posts',
-      options: { sort: { _id: -1 } },
-    });
-    if (profile === null) {
-      return res.status(201).json({
-        checkParams: false,
+    const profile = await User.findOne({ username })
+      .select('profilePictureUrl username')
+      .populate({
+        path: 'posts',
+        options: { sort: { _id: -1 } },
       });
-    }
-    if (Object.keys(profile).length === 0 && profile.constructor === Object) {
-      return res.status(404).json({
-        message: 'get failed',
+    if (!profile) {
+      return next({
+        status: 400,
+        checkUsernameParams: false,
       });
-    }
-    let isCurrentUser = false;
-    if (username === req.user.username) {
-      isCurrentUser = true;
     }
     return res.status(201).json({
       profile,
-      checkParams: true,
-      isCurrentUser,
     });
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
 
@@ -49,6 +41,6 @@ exports.changeAvatar = async (req, res, next) => {
       next({ status: 400, message: 'upload ko thanh cong' });
     }
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };

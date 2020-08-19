@@ -63,7 +63,7 @@ exports.register = async (req, res, next) => {
       accessToken,
     });
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
 
@@ -77,6 +77,6 @@ exports.reset = async (req, res) => {
     }
     res.json({ message: 'Đã gửi email' });
   } catch (err) {
-    res.status(400).json(`Error: ${err}`);
+    return next(err);
   }
 };

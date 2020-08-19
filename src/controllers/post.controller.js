@@ -18,7 +18,7 @@ exports.get = async (req, res, next) => {
       posts: posts,
     });
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
 
@@ -46,7 +46,7 @@ exports.create = async (req, res, next) => {
       next({ status: 400, message: 'upload ko thanh cong' });
     }
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
 exports.reaction = async (req, res, next) => {
