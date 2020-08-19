@@ -15,8 +15,8 @@ const PostSchema = new Schema(
   }
 );
 
-PostSchema.virtual('likes', {
-  ref: 'likes',
+PostSchema.virtual('reactions', {
+  ref: 'reactions',
   localField: '_id',
   foreignField: 'postId',
 });

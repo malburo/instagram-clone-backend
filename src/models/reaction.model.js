@@ -1,6 +1,6 @@
 const { model, Schema } = require('mongoose');
 
-const LikeSchema = new Schema(
+const ReactionSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -9,16 +9,16 @@ const LikeSchema = new Schema(
     },
     postId: {
       type: Schema.Types.ObjectId,
-      required: true,
       ref: 'posts',
+      required: true,
     },
-    isLiked: { type: Boolean, default: false },
+    type: { type: String },
   },
   {
     timestamps: true,
   }
 );
 
-const Like = model('likes', LikeSchema);
+const Reaction = model('reactions', ReactionSchema);
 
-module.exports = Like;
+module.exports = Reaction;
