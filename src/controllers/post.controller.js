@@ -1,5 +1,5 @@
 const Post = require('../models/post.model');
-const Like = require('../models/like.model');
+const Reaction = require('../models/reaction.model');
 const Comment = require('../models/comment.model');
 
 const fs = require('fs');
@@ -7,7 +7,7 @@ const fs = require('fs');
 exports.get = async (req, res, next) => {
   try {
     const posts = await Post.find()
-      .populate({ path: 'likes' })
+      .populate({ path: 'reactions' })
       .populate({
         path: 'comments',
         populate: { path: 'userId' },
@@ -49,46 +49,41 @@ exports.create = async (req, res, next) => {
     return next({ status: 400, message: err.message });
   }
 };
-
-exports.like = async (req, res, next) => {
+exports.reaction = async (req, res, next) => {
   try {
-    const { postId } = req.body;
+    const { postId } = req.params;
+    const { type } = req.body;
     const userId = req.user._id;
-    const like = await Like.create({
-      userId,
-      postId,
-      isLiked: true,
-    });
-    return res.status(201).json({
-      like,
-    });
-  } catch (err) {
-    return next({ status: 400, message: err.message });
-  }
-};
-
-exports.unlike = async (req, res, next) => {
-  try {
-    const { postId } = req.body;
-    const userId = req.user._id;
-    await Like.findOneAndDelete({
+    if (type === 'like') {
+      const reaction = await Reaction.create({
+        userId,
+        postId,
+        type: 'like',
+      });
+      return res.status(201).json({
+        reaction,
+      });
+    }
+    // delete reaction
+    const reaction = await Reaction.findOneAndDelete({
       userId,
       postId,
     });
     return res.status(201).json({
-      unlike: {
+      reaction: {
         userId,
         postId,
       },
     });
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
 
 exports.comment = async (req, res, next) => {
   try {
-    const { comment, postId } = req.body;
+    const { postId } = req.params;
+    const { comment } = req.body;
     let newComment = await Comment.create({
       userId: req.user._id,
       postId,
@@ -99,6 +94,6 @@ exports.comment = async (req, res, next) => {
       data: newComment,
     });
   } catch (err) {
-    return next({ status: 400, message: err.message });
+    return next(err);
   }
 };
