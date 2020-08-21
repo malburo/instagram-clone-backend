@@ -1,13 +1,14 @@
 const express = require('express');
-var multer = require('multer');
-var upload = multer({ dest: 'uploads/' });
-var router = express.Router();
+const router = express.Router();
+
+const multer = require('multer');
+const upload = multer({ dest: './src/public/uploads/' });
 
 const postController = require('../../controllers/post.controller');
+const uploadValidate = require('../../validations/upload.validate');
 
-router.post('/create', upload.single('postImage'), postController.create);
-router.post('/:postId/like', postController.like);
-router.post('/:postId/unlike', postController.unlike);
+router.post('/create', upload.single('postImage'), uploadValidate, postController.create);
+router.post('/:postId/reaction', postController.reaction);
 router.post('/:postId/comment', postController.comment);
 router.get('/', postController.get);
 
