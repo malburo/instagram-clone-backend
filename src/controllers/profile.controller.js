@@ -4,19 +4,13 @@ let cloudinary = require('cloudinary').v2;
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const { username } = req.params;
+    const { username } = res.locals;
     const profile = await User.findOne({ username })
       .select('profilePictureUrl username')
       .populate({
         path: 'posts',
         options: { sort: { _id: -1 } },
       });
-    if (!profile) {
-      return next({
-        status: 400,
-        checkUsernameParams: false,
-      });
-    }
     return res.status(201).json({
       profile,
     });
@@ -27,19 +21,14 @@ exports.getProfile = async (req, res, next) => {
 
 exports.changeAvatar = async (req, res, next) => {
   try {
-    if (req.file) {
-      let profilePictureUrl = null;
-      await cloudinary.uploader.upload(req.file.path, async (error, result) => {
-        profilePictureUrl = result.url;
-      });
-      fs.unlinkSync(req.file.path);
-      await User.findByIdAndUpdate(req.user._id, { profilePictureUrl });
-      return res.status(201).json({
-        profilePictureUrl,
-      });
-    } else {
-      next({ status: 400, message: 'upload ko thanh cong' });
-    }
+    const userId = req.user._id;
+    const profilePicture = await cloudinary.uploader.upload(req.file.path);
+    const profilePictureUrl = profilePicture.url;
+    fs.unlinkSync(req.file.path);
+    await User.findByIdAndUpdate(userId, { profilePictureUrl });
+    return res.status(201).json({
+      profilePictureUrl,
+    });
   } catch (err) {
     return next(err);
   }
