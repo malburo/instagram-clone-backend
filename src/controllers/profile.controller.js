@@ -1,6 +1,6 @@
 const User = require('../models/user.model');
-var fs = require('fs');
-let cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 exports.getProfile = async (req, res, next) => {
   try {
@@ -22,9 +22,11 @@ exports.getProfile = async (req, res, next) => {
 exports.changeAvatar = async (req, res, next) => {
   try {
     const userId = req.user._id;
+    
     const profilePicture = await cloudinary.uploader.upload(req.file.path);
     const profilePictureUrl = profilePicture.url;
     fs.unlinkSync(req.file.path);
+
     await User.findByIdAndUpdate(userId, { profilePictureUrl });
     return res.status(201).json({
       profilePictureUrl,

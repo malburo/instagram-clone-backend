@@ -3,6 +3,7 @@ const Reaction = require('../models/reaction.model');
 const Comment = require('../models/comment.model');
 
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 exports.get = async (req, res, next) => {
   try {
@@ -24,31 +25,30 @@ exports.get = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    if (req.file) {
-      let postPictureUrl = null;
-      await cloudinary.uploader.upload(req.file.path, async (error, result) => {
-        postPictureUrl = result.url;
-      });
-      fs.unlinkSync(req.file.path);
-      const newPost = await Post.create({
-        userId: req.user._id,
-        caption: req.body.caption,
-        postPictureUrl,
-      });
-      const post = await Post.findById(newPost._id)
-        .populate({ path: 'likes' })
-        .populate('comments')
-        .populate({ path: 'userId', select: 'profilePictureUrl username' });
-      return res.status(201).json({
-        newPost: post,
-      });
-    } else {
-      next({ status: 400, message: 'upload ko thanh cong' });
-    }
+    const userId = req.user._id;
+    const { caption } = req.body;
+
+    const postPicture = await cloudinary.uploader.upload(req.file.path);
+    const postPictureUrl = postPicture.url;
+    fs.unlinkSync(req.file.path);
+    console.log(req.file.path)
+    const newPost = await Post.create({
+      userId,
+      caption,
+      postPictureUrl,
+    });
+    const post = await Post.findById(newPost._id)
+      .populate('reactions')
+      .populate('comments')
+      .populate({ path: 'userId', select: 'profilePictureUrl username' });
+    return res.status(201).json({
+      newPost: post,
+    });
   } catch (err) {
     return next(err);
   }
 };
+
 exports.reaction = async (req, res, next) => {
   try {
     const { postId } = req.params;
