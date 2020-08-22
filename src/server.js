@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 
+app.use(cors());
 const route = require('./api/routes');
 const db = require('./configs/database');
 const cloudinary = require('./configs/cloudinary');
@@ -12,7 +13,6 @@ const port = process.env.PORT || 8080;
 
 require('dotenv').config();
 
-app.use(cors());
 
 // Connect to DB
 db.connect();
