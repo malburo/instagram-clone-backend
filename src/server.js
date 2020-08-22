@@ -7,6 +7,7 @@ const app = express();
 const route = require('./api/routes');
 const db = require('./configs/database');
 const cloudinary = require('./configs/cloudinary');
+const sendgrid = require('./configs/sendgrid');
 const port = process.env.PORT || 8080;
 
 require('dotenv').config();
@@ -18,6 +19,9 @@ db.connect();
 
 // config cloudinary
 cloudinary.config();
+
+// config sendgrid
+sendgrid.config();
 
 // Use static folder
 app.use(express.static(path.join(__dirname, 'public')));
