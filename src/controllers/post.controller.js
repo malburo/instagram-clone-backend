@@ -31,7 +31,7 @@ exports.create = async (req, res, next) => {
     const postPicture = await cloudinary.uploader.upload(req.file.path);
     const postPictureUrl = postPicture.url;
     fs.unlinkSync(req.file.path);
-    console.log(req.file.path)
+
     const newPost = await Post.create({
       userId,
       caption,

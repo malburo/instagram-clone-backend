@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const sgMail = require('@sendgrid/mail');
 
 exports.checkToken = async (req, res, next) => {
   try {
@@ -67,15 +68,56 @@ exports.register = async (req, res, next) => {
   }
 };
 
-exports.reset = async (req, res) => {
+exports.resetPassword = async (req, res, next) => {
   try {
-    let user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return res.status(400).json({
-        message: 'Email không tồn tại',
-      });
-    }
-    res.json({ message: 'Đã gửi email' });
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    const accessToken = jwt.sign(
+      {
+        userId: user.id,
+      },
+      process.env.SECRET,
+      { expiresIn: '5m' }
+    );
+    const msg = {
+      to: user.email,
+      from: 'malburo2000@gmail.com', // Use the email address or domain you verified above
+      subject: 'Reset password from malbuo',
+      text: `Xin chao, de reset password ban hay an vao link duoi day:
+      http://localhost:3000/auth/reset/${accessToken}
+      `,
+    };
+    await sgMail.send(msg);
+
+    res.status(200).json({ message: 'success' });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.verifyMailResetPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    jwt.verify(token, process.env.SECRET);
+    res.status(200);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.newPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+    const decoded = jwt.verify(token, process.env.SECRET);
+    const { userId } = decoded;
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    await User.updateOne(
+      { _id: userId },
+      { $set: { password: hashedPassword } }
+    );
+    res.status(200).json({ message: 'Success!!' });
   } catch (err) {
     return next(err);
   }
