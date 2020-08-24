@@ -9,6 +9,7 @@ const validateResetPassword = require('../../validations/resetPassword.validate'
 const { ensureAuthMiddleware } = require('../middlewares/auth.middleware');
 
 router.post('/login', validateLogin, authController.login);
+router.get('/me', ensureAuthMiddleware, authController.me);
 router.post('/register', validateRegister, authController.register);
 router.post('/reset', validateResetPassword, authController.resetPassword);
 router.post('/reset/:token', authController.newPassword);

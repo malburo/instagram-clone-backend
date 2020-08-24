@@ -38,9 +38,23 @@ exports.login = async (req, res, next) => {
         password: 'Password không đúng',
       });
     }
+    const data = {
+      id: user.id,
+      fullname: user.fullname,
+    };
+    const access_token = jwt.sign(data, process.env.SECRET);
+    res.json({ access_token });
+  } catch (err) {
+    return next(err);
+  }
+};
+exports.me = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
     delete user._doc.password;
-    const accessToken = jwt.sign(user._doc, process.env.SECRET);
-    res.json({ user, accessToken });
+    return res.status(201).json({
+      data: user,
+    });
   } catch (err) {
     return next(err);
   }
