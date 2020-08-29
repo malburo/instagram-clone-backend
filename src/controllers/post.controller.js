@@ -35,7 +35,9 @@ exports.create = async (req, res, next) => {
     const userId = req.user.id;
     const { caption } = req.body;
 
-    const postPicture = await cloudinary.uploader.upload(req.file.path);
+    const postPicture = await cloudinary.uploader.upload(req.file.path, {
+      secure: true,
+    });
     const postPictureUrl = postPicture.url;
     fs.unlinkSync(req.file.path);
 
