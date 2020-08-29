@@ -5,18 +5,25 @@ const Comment = require('../models/comment.model');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
-exports.get = async (req, res, next) => {
+exports.getPostByLimit = async (req, res, next) => {
   try {
-    const posts = await Post.find()
-      .populate({ path: 'reactions' })
-      .populate({
-        path: 'comments',
-        populate: { path: 'userId' },
-      })
-      .populate({ path: 'userId', select: 'profilePictureUrl username' })
-      .sort({ _id: -1 });
+    const { limit, skip } = req.query;
+    const [totalPost, posts] = await Promise.all([
+      Post.find().count(),
+      Post.find()
+        .skip(parseInt(skip))
+        .limit(parseInt(limit))
+        .sort({ _id: -1 })
+        .populate({ path: 'reactions' })
+        .populate({
+          path: 'comments',
+          populate: { path: 'userId' },
+        })
+        .populate({ path: 'userId', select: 'profilePictureUrl username' }),
+    ]);
     return res.status(201).json({
       posts: posts,
+      totalPost: totalPost,
     });
   } catch (err) {
     return next(err);
@@ -25,7 +32,7 @@ exports.get = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { caption } = req.body;
 
     const postPicture = await cloudinary.uploader.upload(req.file.path);
@@ -37,7 +44,7 @@ exports.create = async (req, res, next) => {
       caption,
       postPictureUrl,
     });
-    const post = await Post.findById(newPost._id)
+    const post = await Post.findById(newPost.id)
       .populate('reactions')
       .populate('comments')
       .populate({ path: 'userId', select: 'profilePictureUrl username' });
@@ -53,7 +60,7 @@ exports.reaction = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const { type } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
     if (type === 'like') {
       const reaction = await Reaction.create({
         userId,
@@ -83,15 +90,15 @@ exports.reaction = async (req, res, next) => {
 exports.comment = async (req, res, next) => {
   try {
     const { postId } = req.params;
-    const { comment } = req.body;
+    const { content } = req.body;
     let newComment = await Comment.create({
-      userId: req.user._id,
+      userId: req.user.id,
       postId,
-      content: comment,
+      content,
     });
     newComment._doc.userId = req.user;
     return res.status(201).json({
-      data: newComment,
+      newComment,
     });
   } catch (err) {
     return next(err);

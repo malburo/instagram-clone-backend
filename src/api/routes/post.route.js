@@ -7,9 +7,14 @@ const upload = multer({ dest: './src/public/uploads/' });
 const postController = require('../../controllers/post.controller');
 const uploadValidate = require('../../validations/upload.validate');
 
-router.post('/create', upload.single('postImage'), uploadValidate, postController.create);
+router.post(
+  '/create',
+  upload.single('postImage'),
+  uploadValidate,
+  postController.create
+);
 router.post('/:postId/reaction', postController.reaction);
 router.post('/:postId/comment', postController.comment);
-router.get('/', postController.get);
+router.get('/', postController.getPostByLimit);
 
 module.exports = router;
