@@ -25,7 +25,7 @@ exports.changeAvatar = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const profilePicture = await cloudinary.uploader.upload(req.file.path);
-    const profilePictureUrl = profilePicture.url;
+    const profilePictureUrl = profilePicture.secure_url;
     fs.unlinkSync(req.file.path);
 
     await User.updateOne({ _id: userId }, { $set: { profilePictureUrl } });
