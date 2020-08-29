@@ -3,19 +3,15 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sgMail = require('@sendgrid/mail');
 
-exports.checkToken = async (req, res, next) => {
+exports.me = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.id);
     delete user._doc.password;
-    res.status(201).json({
-      user,
-      isValid: true,
+    return res.status(201).json({
+      data: user,
     });
   } catch (err) {
-    return next({
-      status: 400,
-      message: err.message,
-    });
+    return next(err);
   }
 };
 
@@ -40,21 +36,11 @@ exports.login = async (req, res, next) => {
     }
     const data = {
       id: user.id,
+      username: user.username,
       fullname: user.fullname,
     };
     const access_token = jwt.sign(data, process.env.SECRET);
-    res.json({ access_token });
-  } catch (err) {
-    return next(err);
-  }
-};
-exports.me = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id);
-    delete user._doc.password;
-    return res.status(201).json({
-      data: user,
-    });
+    res.status(201).json({ access_token });
   } catch (err) {
     return next(err);
   }
@@ -71,12 +57,13 @@ exports.register = async (req, res, next) => {
       email,
       password: hashedPassword,
     });
-    delete newUser._doc.password;
-    const accessToken = jwt.sign(newUser._doc, process.env.SECRET);
-    return res.status(201).json({
-      user: newUser,
-      accessToken,
-    });
+    const data = {
+      id: newUser.id,
+      username: newUser.username,
+      fullname: newUser.fullname,
+    };
+    const access_token = jwt.sign(data, process.env.SECRET);
+    res.status(201).json({ access_token });
   } catch (err) {
     return next(err);
   }
