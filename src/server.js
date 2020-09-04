@@ -6,13 +6,12 @@ const app = express();
 
 app.use(cors());
 const route = require('./api/routes');
-const db = require('./configs/database');
-const cloudinary = require('./configs/cloudinary');
-const sendgrid = require('./configs/sendgrid');
+const db = require('./configs/mongoose.config');
+const cloudinary = require('./configs/cloudinary.config');
+const sendgrid = require('./configs/sendgrid.config');
 const port = process.env.PORT || 8080;
 
 require('dotenv').config();
-
 
 // Connect to DB
 db.connect();
