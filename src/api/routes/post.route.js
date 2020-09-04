@@ -2,14 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const multer = require('multer');
-const upload = multer({ dest: './src/public/uploads/' });
+const upload = require('../../configs/multer.config');
 
 const postController = require('../../controllers/post.controller');
 const uploadValidate = require('../../validations/upload.validate');
 
 router.post(
   '/create',
-  upload.single('postImage'),
+  upload.array('files'),
   uploadValidate,
   postController.create
 );

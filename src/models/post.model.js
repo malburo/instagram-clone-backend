@@ -8,7 +8,7 @@ const PostSchema = new Schema(
       ref: 'users',
     },
     caption: { type: String },
-    postPictureUrl: { type: String },
+    postListPictureUrl: [{ public_id: String, url: String }],
   },
   {
     timestamps: true,

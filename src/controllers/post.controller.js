@@ -2,14 +2,13 @@ const Post = require('../models/post.model');
 const Reaction = require('../models/reaction.model');
 const Comment = require('../models/comment.model');
 
+const cloudinary = require('../configs/cloudinary.config');
 const fs = require('fs');
-const cloudinary = require('cloudinary').v2;
-
 exports.getPostByLimit = async (req, res, next) => {
   try {
     const { limit, skip } = req.query;
     const [totalPost, posts] = await Promise.all([
-      Post.find().count(),
+      Post.find().countDocuments(),
       Post.find()
         .skip(parseInt(skip))
         .limit(parseInt(limit))
@@ -35,19 +34,26 @@ exports.create = async (req, res, next) => {
     const userId = req.user.id;
     const { caption } = req.body;
 
-    const postPicture = await cloudinary.uploader.upload(req.file.path);
-    const postPictureUrl = postPicture.secure_url;
-    fs.unlinkSync(req.file.path);
-
+    const uploader = async path =>
+      await cloudinary.uploads(path, 'Instagram/Posts');
+    const postListPictureUrl = [];
+    const files = req.files;
+    for (const file of files) {
+      const { path } = file;
+      const newPath = await uploader(path);
+      postListPictureUrl.push(newPath);
+      fs.unlinkSync(path);
+    }
     const newPost = await Post.create({
       userId,
       caption,
-      postPictureUrl,
+      postListPictureUrl,
     });
     const post = await Post.findById(newPost.id)
       .populate('reactions')
       .populate('comments')
       .populate({ path: 'userId', select: 'profilePictureUrl username' });
+
     return res.status(201).json({
       newPost: post,
     });
