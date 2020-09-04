@@ -1,7 +1,6 @@
 const User = require('../models/user.model');
 const fs = require('fs');
-const cloudinary = require('cloudinary').v2;
-
+const cloudinary = require('../configs/cloudinary.config');
 exports.getProfile = async (req, res, next) => {
   try {
     const { username } = req.params;
@@ -24,9 +23,10 @@ exports.getProfile = async (req, res, next) => {
 exports.changeAvatar = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const profilePicture = await cloudinary.uploader.upload(req.file.path);
-    const profilePictureUrl = profilePicture.secure_url;
-    fs.unlinkSync(req.file.path);
+    const { path } = req.file;
+    const profilePicture = await cloudinary.uploads(path, 'Instagram/Avatar');
+    const profilePictureUrl = profilePicture.url;
+    fs.unlinkSync(path);
 
     await User.updateOne({ _id: userId }, { $set: { profilePictureUrl } });
     return res.status(201).json({
