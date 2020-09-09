@@ -1,18 +1,28 @@
 const express = require('express');
 const router = express.Router();
+const { celebrate } = require('celebrate');
 
 const authController = require('../../controllers/auth.controller');
+const authValidate = require('../../validations/auth.validate');
 
-const validateLogin = require('../../validations/login.validate');
-const validateRegister = require('../../validations/register.validate');
-const validateResetPassword = require('../../validations/resetPassword.validate');
 const { ensureAuthMiddleware } = require('../middlewares/auth.middleware');
 
-router.get('/me', ensureAuthMiddleware, authController.me);
-router.post('/login', validateLogin, authController.login);
-router.post('/register', validateRegister, authController.register);
-router.post('/reset', validateResetPassword, authController.resetPassword);
-router.post('/reset/:token', authController.newPassword);
-router.get('/reset/:token', authController.verifyMailResetPassword);
+router.route('/me').get(ensureAuthMiddleware, authController.me);
+router
+  .route('/login')
+  .post(celebrate({ body: authValidate.loginSchema }), authController.login);
+router
+  .route('/register')
+  .post(celebrate({ body: authValidate.registerSchema }), authController.register);
+router
+  .route('/reset')
+  .post(
+    celebrate({ body: authValidate.resetPasswordSchema }),
+    authController.resetPassword
+  );
+router
+  .route('/reset/:token')
+  .get(authController.verifyMailResetPassword)
+  .post(authController.newPassword);
 
 module.exports = router;

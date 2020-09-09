@@ -33,11 +33,9 @@ app.use(morgan('dev'));
 // Routes init
 route(app);
 
-app.use((error, req, res, next) => {
-  console.log(error);
-  res.status(error.status || 500);
-  res.json(error);
-});
+// handle Error
+app.use(errors({ statusCode: 401 }));
+//app.use(handleError);
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
