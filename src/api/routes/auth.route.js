@@ -2,18 +2,20 @@ const express = require('express');
 const router = express.Router();
 const { celebrate } = require('celebrate');
 
-const authController = require('../../controllers/auth.controller');
 const authValidate = require('../../validations/auth.validate');
+const authMiddleware = require('../middlewares/auth.middleware');
+const authController = require('../../controllers/auth.controller');
 
-const { ensureAuthMiddleware } = require('../middlewares/auth.middleware');
-
-router.route('/me').get(ensureAuthMiddleware, authController.me);
+router.route('/me').get(authMiddleware.ensureAuthMiddleware, authController.me);
 router
   .route('/login')
   .post(celebrate({ body: authValidate.loginSchema }), authController.login);
 router
   .route('/register')
-  .post(celebrate({ body: authValidate.registerSchema }), authController.register);
+  .post(
+    celebrate({ body: authValidate.registerSchema }),
+    authController.register
+  );
 router
   .route('/reset')
   .post(

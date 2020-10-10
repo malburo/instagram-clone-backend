@@ -1,22 +1,21 @@
 const jwt = require('jsonwebtoken');
+const Response = require('../../helpers/response.helper');
 
-exports.ensureAuthMiddleware = async (req, res, next) => {
+const ensureAuthMiddleware = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
-      return next({
-        status: 401,
-        message: 'No token provided',
-      });
+      return Response.error(res, { message: 'No token provided' }, 401);
     }
     token = token.split(' ')[1];
     const user = await jwt.verify(token, process.env.SECRET);
     req.user = user;
     next();
-  } catch (err) {
-    return next({
-      status: 401,
-      message: 'Failed to authenticate token',
-    });
+  } catch (error) {
+    next(error);
   }
+};
+
+module.exports = {
+  ensureAuthMiddleware,
 };

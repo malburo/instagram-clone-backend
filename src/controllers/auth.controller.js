@@ -2,70 +2,90 @@ const User = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sgMail = require('@sendgrid/mail');
+const Response = require('../helpers/response.helper');
 
 exports.me = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     delete user._doc.password;
-    return res.status(201).json({
-      data: user,
-    });
-  } catch (err) {
-    return next(err);
+    return Response.success(res, { currentUser: user });
+  } catch (error) {
+    return next(error);
   }
 };
 
 exports.login = async (req, res, next) => {
   try {
-    const user = await User.findOne({ username: req.body.username });
+    const { username, password } = req.body;
+    const user = await User.findOne({ username: username });
+    // check user
     if (!user) {
-      return next({
-        status: 401,
-        username: 'Username không tồn tại',
-      });
+      return Response.error(
+        res,
+        { message: 'Username không tồn tại', key: 'username' },
+        401
+      );
     }
-    const checkPassword = await bcrypt.compare(
-      req.body.password,
-      user.password
+    const comparePassword = await bcrypt.compare(password, user.password);
+    if (comparePassword === false) {
+      return Response.error(
+        res,
+        { message: 'Password không đúng', key: 'password' },
+        401
+      );
+    }
+    // generate access token
+    const access_token = jwt.sign(
+      { id: user.id, username: user.username, fullname: user.fullname },
+      process.env.SECRET
     );
-    if (!checkPassword) {
-      return next({
-        status: 401,
-        password: 'Password không đúng',
-      });
-    }
-    const data = {
-      id: user.id,
-      username: user.username,
-      fullname: user.fullname,
-    };
-    const access_token = jwt.sign(data, process.env.SECRET);
-    res.status(201).json({ access_token });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { access_token }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
 
 exports.register = async (req, res, next) => {
   try {
-    const saltRounds = 10;
     const { fullname, username, email, password } = req.body;
+    const [checkEmail, checkUsername] = await Promise.all([
+      User.find({ email: req.body.email }),
+      User.find({ username: req.body.username }),
+    ]);
+    if (checkUsername.length) {
+      return Response.error(
+        res,
+        { message: 'Username này đã được sử dụng', key: 'username' },
+        401
+      );
+    }
+    if (checkEmail.length) {
+      return Response.error(res, {
+        message: 'Email này đã được sử dụng',
+        key: 'email',
+      });
+    }
+    // hash password
+    const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    let newUser = await User.create({
+    const newUser = await User.create({
       fullname,
       username,
       email,
       password: hashedPassword,
     });
-    const data = {
-      id: newUser.id,
-      username: newUser.username,
-      fullname: newUser.fullname,
-    };
-    const access_token = jwt.sign(data, process.env.SECRET);
-    res.status(201).json({ access_token });
-  } catch (err) {
-    return next(err);
+    // generate access token
+    const access_token = jwt.sign(
+      {
+        id: newUser.id,
+        username: newUser.username,
+        fullname: newUser.fullname,
+      },
+      process.env.SECRET
+    );
+    Response.success(res, { access_token }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -73,6 +93,13 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
+    if (!user) {
+      return Response.error(
+        res,
+        { message: 'Email không tồn tại', key: 'email' },
+        401
+      );
+    }
     const accessToken = jwt.sign(
       {
         userId: user.id,
@@ -89,20 +116,20 @@ exports.resetPassword = async (req, res, next) => {
       `,
     };
     await sgMail.send(msg);
-
-    res.status(200).json({ message: 'success' });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { message: 'success' });
+  } catch (error) {
+    return next(error);
   }
 };
 
 exports.verifyMailResetPassword = async (req, res, next) => {
   try {
     const { token } = req.params;
+    // check access token
     jwt.verify(token, process.env.SECRET);
-    res.status(200);
-  } catch (err) {
-    return next(err);
+    Response.success(res, { message: 'success' });
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -110,16 +137,20 @@ exports.newPassword = async (req, res, next) => {
   try {
     const { token } = req.params;
     const { newPassword } = req.body;
+
+    // check access token
     const decoded = jwt.verify(token, process.env.SECRET);
     const { userId } = decoded;
+
+    //hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
     await User.updateOne(
       { _id: userId },
       { $set: { password: hashedPassword } }
     );
-    res.status(200).json({ message: 'Success!!' });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { message: 'success' });
+  } catch (error) {
+    return next(error);
   }
 };

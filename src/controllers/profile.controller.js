@@ -1,6 +1,8 @@
 const User = require('../models/user.model');
 const fs = require('fs');
 const cloudinary = require('../configs/cloudinary.config');
+const Response = require('../helpers/response.helper');
+
 exports.getProfile = async (req, res, next) => {
   try {
     const { username } = req.params;
@@ -12,11 +14,9 @@ exports.getProfile = async (req, res, next) => {
         options: { sort: { _id: -1 } },
       });
     profile._doc.isCurrentUser = isCurrentUser;
-    return res.status(201).json({
-      profile,
-    });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { profile }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -29,10 +29,8 @@ exports.changeAvatar = async (req, res, next) => {
     fs.unlinkSync(path);
 
     await User.updateOne({ _id: userId }, { $set: { profilePictureUrl } });
-    return res.status(201).json({
-      profilePictureUrl,
-    });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { profilePictureUrl }, 201);
+  } catch (error) {
+    return next(error);
   }
 };

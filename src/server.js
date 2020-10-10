@@ -2,13 +2,15 @@ const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
 const cors = require('cors');
+const { errors, CelebrateError, Segments } = require('celebrate');
 const app = express();
-
 app.use(cors());
 const route = require('./api/routes');
 const db = require('./configs/mongoose.config');
 const cloudinary = require('./configs/cloudinary.config');
 const sendgrid = require('./configs/sendgrid.config');
+const handleError = require('./helpers/handleError.helper');
+const handle404 = require('./helpers/handle404.helper');
 const port = process.env.PORT || 8080;
 
 require('dotenv').config();
@@ -33,9 +35,9 @@ app.use(morgan('dev'));
 // Routes init
 route(app);
 
-// handle Error
-app.use(errors({ statusCode: 401 }));
-//app.use(handleError);
+// handle error
+app.use(handle404);
+app.use(handleError);
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);

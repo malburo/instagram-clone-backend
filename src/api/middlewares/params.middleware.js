@@ -1,14 +1,12 @@
 const User = require('../../models/user.model');
+const Response = require('../../helpers/response.helper');
 
 exports.username = async (req, res, next) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username });
     if (!user) {
-      return next({
-        status: 400,
-        checkUsernameParams: false,
-      });
+      return Response.error(res, { checkUsernameParams: false });
     }
     if (user.username === req.user.username) {
       res.locals.isCurrentUser = true;
@@ -16,7 +14,7 @@ exports.username = async (req, res, next) => {
       res.locals.isCurrentUser = false;
     }
     next();
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    return next(error);
   }
 };

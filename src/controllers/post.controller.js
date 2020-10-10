@@ -3,7 +3,9 @@ const Reaction = require('../models/reaction.model');
 const Comment = require('../models/comment.model');
 
 const cloudinary = require('../configs/cloudinary.config');
+const Response = require('../helpers/response.helper');
 const fs = require('fs');
+
 exports.getPostByLimit = async (req, res, next) => {
   try {
     const { limit, skip } = req.query;
@@ -20,12 +22,9 @@ exports.getPostByLimit = async (req, res, next) => {
         })
         .populate({ path: 'userId', select: 'profilePictureUrl username' }),
     ]);
-    return res.status(201).json({
-      posts: posts,
-      totalPost: totalPost,
-    });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { posts: posts, totalPost: totalPost }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -44,21 +43,19 @@ exports.create = async (req, res, next) => {
       postListPictureUrl.push(newPath);
       fs.unlinkSync(path);
     }
-    const newPost = await Post.create({
+    let newPost = await Post.create({
       userId,
       caption,
       postListPictureUrl,
     });
-    const post = await Post.findById(newPost.id)
+    newPost = await newPost
       .populate('reactions')
       .populate('comments')
-      .populate({ path: 'userId', select: 'profilePictureUrl username' });
-
-    return res.status(201).json({
-      newPost: post,
-    });
-  } catch (err) {
-    return next(err);
+      .populate({ path: 'userId', select: 'profilePictureUrl username' })
+      .execPopulate();
+    Response.success(res, { newPost }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -67,29 +64,24 @@ exports.reaction = async (req, res, next) => {
     const { postId } = req.params;
     const { type } = req.body;
     const userId = req.user.id;
+
+    // reaction
     if (type === 'like') {
       const reaction = await Reaction.create({
         userId,
         postId,
         type: 'like',
       });
-      return res.status(201).json({
-        reaction,
-      });
+      return Response.success(res, { reaction }, 201);
     }
     // delete reaction
-    const reaction = await Reaction.findOneAndDelete({
+    await Reaction.findOneAndDelete({
       userId,
       postId,
     });
-    return res.status(201).json({
-      reaction: {
-        userId,
-        postId,
-      },
-    });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { reaction: { userId, postId } }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -103,10 +95,8 @@ exports.comment = async (req, res, next) => {
       content,
     });
     newComment._doc.userId = req.user;
-    return res.status(201).json({
-      newComment,
-    });
-  } catch (err) {
-    return next(err);
+    Response.success(res, { newComment }, 201);
+  } catch (error) {
+    return next(error);
   }
 };
