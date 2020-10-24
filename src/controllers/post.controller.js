@@ -64,19 +64,20 @@ exports.reaction = async (req, res, next) => {
     const { postId } = req.params;
     const userId = req.user.id;
     const check = await Reaction.findOne({ postId, userId });
-    if (check === null) {
+    if (check) {
+      await Reaction.findOneAndDelete({
+        userId,
+        postId,
+      });
+      Response.success(res, { reaction: { userId, postId } }, 201);
+    } else {
       const reaction = await Reaction.create({
         userId,
         postId,
         type: "like",
       });
-      return Response.success(res, { reaction }, 201);
+      Response.success(res, { reaction }, 201);
     }
-    await Reaction.findOneAndDelete({
-      userId,
-      postId,
-    });
-    Response.success(res, { reaction: { userId, postId } }, 201);
   } catch (error) {
     return next(error);
   }
