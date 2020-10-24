@@ -1,10 +1,10 @@
-const Post = require('../models/post.model');
-const Reaction = require('../models/reaction.model');
-const Comment = require('../models/comment.model');
+const Post = require("../models/post.model");
+const Reaction = require("../models/reaction.model");
+const Comment = require("../models/comment.model");
 
-const cloudinary = require('../configs/cloudinary.config');
-const Response = require('../helpers/response.helper');
-const fs = require('fs');
+const cloudinary = require("../configs/cloudinary.config");
+const Response = require("../helpers/response.helper");
+const fs = require("fs");
 
 exports.getPostByLimit = async (req, res, next) => {
   try {
@@ -15,12 +15,12 @@ exports.getPostByLimit = async (req, res, next) => {
         .skip(parseInt(skip))
         .limit(parseInt(limit))
         .sort({ _id: -1 })
-        .populate({ path: 'reactions' })
+        .populate({ path: "reactions" })
         .populate({
-          path: 'comments',
-          populate: { path: 'userId' },
+          path: "comments",
+          populate: { path: "userId" },
         })
-        .populate({ path: 'userId', select: 'profilePictureUrl username' }),
+        .populate({ path: "userId", select: "profilePictureUrl username" }),
     ]);
     Response.success(res, { posts: posts, totalPost: totalPost }, 201);
   } catch (error) {
@@ -33,8 +33,8 @@ exports.create = async (req, res, next) => {
     const userId = req.user.id;
     const { caption } = req.body;
 
-    const uploader = async path =>
-      await cloudinary.uploads(path, 'Instagram/Posts');
+    const uploader = async (path) =>
+      await cloudinary.uploads(path, "Instagram/Posts");
     const postListPictureUrl = [];
     const files = req.files;
     for (const file of files) {
@@ -49,9 +49,9 @@ exports.create = async (req, res, next) => {
       postListPictureUrl,
     });
     newPost = await newPost
-      .populate('reactions')
-      .populate('comments')
-      .populate({ path: 'userId', select: 'profilePictureUrl username' })
+      .populate("reactions")
+      .populate("comments")
+      .populate({ path: "userId", select: "profilePictureUrl username" })
       .execPopulate();
     Response.success(res, { newPost }, 201);
   } catch (error) {
@@ -64,13 +64,14 @@ exports.reaction = async (req, res, next) => {
     const { postId } = req.params;
     const { type } = req.body;
     const userId = req.user.id;
-
+    console.log(type);
     // reaction
-    if (type === 'like') {
+    const check = await Reaction.findOne({ postId, userId });
+    if (check === null) {
       const reaction = await Reaction.create({
         userId,
         postId,
-        type: 'like',
+        type: "like",
       });
       return Response.success(res, { reaction }, 201);
     }

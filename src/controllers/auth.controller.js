@@ -1,8 +1,8 @@
-const User = require('../models/user.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const sgMail = require('@sendgrid/mail');
-const Response = require('../helpers/response.helper');
+const User = require("../models/user.model");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const sgMail = require("@sendgrid/mail");
+const Response = require("../helpers/response.helper");
 
 exports.me = async (req, res, next) => {
   try {
@@ -22,7 +22,7 @@ exports.login = async (req, res, next) => {
     if (!user) {
       return Response.error(
         res,
-        { message: 'Username không tồn tại', key: 'username' },
+        { message: "Username không tồn tại", key: "username" },
         401
       );
     }
@@ -30,7 +30,7 @@ exports.login = async (req, res, next) => {
     if (comparePassword === false) {
       return Response.error(
         res,
-        { message: 'Password không đúng', key: 'password' },
+        { message: "Password không đúng", key: "password" },
         401
       );
     }
@@ -55,14 +55,14 @@ exports.register = async (req, res, next) => {
     if (checkUsername.length) {
       return Response.error(
         res,
-        { message: 'Username này đã được sử dụng', key: 'username' },
+        { message: "Username này đã được sử dụng", key: "username" },
         401
       );
     }
     if (checkEmail.length) {
       return Response.error(res, {
-        message: 'Email này đã được sử dụng',
-        key: 'email',
+        message: "Email này đã được sử dụng",
+        key: "email",
       });
     }
     // hash password
@@ -96,7 +96,7 @@ exports.resetPassword = async (req, res, next) => {
     if (!user) {
       return Response.error(
         res,
-        { message: 'Email không tồn tại', key: 'email' },
+        { message: "Email không tồn tại", key: "email" },
         401
       );
     }
@@ -105,18 +105,18 @@ exports.resetPassword = async (req, res, next) => {
         userId: user.id,
       },
       process.env.SECRET,
-      { expiresIn: '5m' }
+      { expiresIn: "5m" }
     );
     const msg = {
       to: user.email,
-      from: 'malburo2000@gmail.com', // Use the email address or domain you verified above
-      subject: 'Reset password from malbuo',
+      from: "malburo2000@gmail.com", // Use the email address or domain you verified above
+      subject: "Reset password from malbuo",
       text: `Xin chao, de reset password ban hay an vao link duoi day:
       http://localhost:3000/auth/reset/${accessToken}
       `,
     };
     await sgMail.send(msg);
-    Response.success(res, { message: 'success' });
+    Response.success(res, { message: "success" });
   } catch (error) {
     return next(error);
   }
@@ -127,7 +127,7 @@ exports.verifyMailResetPassword = async (req, res, next) => {
     const { token } = req.params;
     // check access token
     jwt.verify(token, process.env.SECRET);
-    Response.success(res, { message: 'success' });
+    Response.success(res, { message: "success" });
   } catch (error) {
     return next(error);
   }
@@ -149,7 +149,7 @@ exports.newPassword = async (req, res, next) => {
       { _id: userId },
       { $set: { password: hashedPassword } }
     );
-    Response.success(res, { message: 'success' });
+    Response.success(res, { message: "success" });
   } catch (error) {
     return next(error);
   }

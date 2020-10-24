@@ -1,7 +1,7 @@
-const User = require('../models/user.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const Response = require('../helpers/response.helper');
+const User = require("../models/user.model");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const Response = require("../helpers/response.helper");
 
 exports.editProfile = async (req, res, next) => {
   try {
@@ -22,12 +22,17 @@ exports.editProfile = async (req, res, next) => {
 exports.changePassword = async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { newPassword } = req.body;
-
-    //hash password
     const saltRounds = 10;
+    const { currentPassword, newPassword } = req.body;
+    const infoCurrentUser = await User.findById(id);
+    const comparePassword = await bcrypt.compare(
+      currentPassword,
+      infoCurrentUser.password
+    );
+    if (!comparePassword) {
+      return Response.error(res, { message: "Password incorect !" }, 401);
+    }
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
     const user = await User.findByIdAndUpdate(
       { _id: id },
       { $set: { password: hashedPassword } }
