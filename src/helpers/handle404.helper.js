@@ -1,11 +1,11 @@
-const Response = require('./response.helper');
+const Response = require("./response.helper");
 
 function handle404(req, res, next) {
   return Response.error(
     res,
     {
-      type: 'Not found',
-      message: 'API not found',
+      type: "Not found",
+      message: "API not found",
     },
     404
   );

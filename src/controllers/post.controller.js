@@ -62,10 +62,7 @@ exports.create = async (req, res, next) => {
 exports.reaction = async (req, res, next) => {
   try {
     const { postId } = req.params;
-    const { type } = req.body;
     const userId = req.user.id;
-    console.log(type);
-    // reaction
     const check = await Reaction.findOne({ postId, userId });
     if (check === null) {
       const reaction = await Reaction.create({
@@ -75,7 +72,6 @@ exports.reaction = async (req, res, next) => {
       });
       return Response.success(res, { reaction }, 201);
     }
-    // delete reaction
     await Reaction.findOneAndDelete({
       userId,
       postId,
